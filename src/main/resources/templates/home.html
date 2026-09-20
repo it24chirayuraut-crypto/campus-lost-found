@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Campus Lost &amp; Found</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <h1>Campus Lost &amp; Found Tracker</h1>
+    <a href="/post">+ Report an Item</a>
+
+    <form method="get" action="/">
+        <select name="type">
+            <option value="">All Types</option>
+            <option value="Lost" th:selected="${selectedType == 'Lost'}">Lost</option>
+            <option value="Found" th:selected="${selectedType == 'Found'}">Found</option>
+        </select>
+        <select name="category">
+            <option value="">All Categories</option>
+            <option value="Electronics" th:selected="${selectedCategory == 'Electronics'}">Electronics</option>
+            <option value="ID Card" th:selected="${selectedCategory == 'ID Card'}">ID Card</option>
+            <option value="Bag" th:selected="${selectedCategory == 'Bag'}">Bag</option>
+            <option value="Keys" th:selected="${selectedCategory == 'Keys'}">Keys</option>
+            <option value="Other" th:selected="${selectedCategory == 'Other'}">Other</option>
+        </select>
+        <button type="submit">Filter</button>
+    </form>
+
+    <table border="1" cellpadding="8">
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Category</th>
+            <th>Location</th>
+        </tr>
+        <tr th:each="item : ${items}">
+            <td>
+                <a th:href="@{/item/{id}(id=${item.id})}" th:text="${item.name}">Item Name</a>
+            </td>
+            <td th:text="${item.type}">Type</td>
+            <td th:text="${item.category}">Category</td>
+            <td th:text="${item.location}">Location</td>
+        </tr>
+    </table>
+
+    <p th:if="${#lists.isEmpty(items)}">No items reported yet.</p>
+</body>
+</html>
