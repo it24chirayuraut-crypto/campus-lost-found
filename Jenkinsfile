@@ -42,13 +42,13 @@ pipeline {
         }
 
         stage('Run App Container') {
-            steps {
-                bat "docker run -d -p 8081:8081 --name %TEST_CONTAINER% %DOCKERHUB_REPO%:%IMAGE_TAG%"
-                // give the app a few seconds to finish starting before tests hit it
-                bat 'ping -n 10 127.0.0.1 > nul'
-            }
-        }
-
+    steps {
+        bat 'docker stop lostfound-prod 2>nul || exit 0'
+        bat 'for /f %%i in (\'docker ps -aq --filter "name=lostfound-test-"\') do docker rm -f %%i'
+        bat "docker run -d -p 8081:8081 --name %TEST_CONTAINER% %DOCKERHUB_REPO%:%IMAGE_TAG%"
+        bat 'ping -n 10 127.0.0.1 > nul'
+    }
+}
         stage('Selenium Test') {
             steps {
                 bat 'mvn test -Dtest=LostFoundSeleniumTest'
