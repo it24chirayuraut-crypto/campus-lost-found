@@ -13,7 +13,7 @@ pipeline {
     }
 
     triggers {
-        pollSCM('H/5 * * * *')
+        githubPush()
     }
 
     stages {
@@ -40,17 +40,19 @@ pipeline {
                 bat "docker build -t %DOCKERHUB_REPO%:%IMAGE_TAG% -t %DOCKERHUB_REPO%:latest ."
             }
         }
+
         stage('Run App Container') {
             steps {
-              bat 'docker stop lostfound-prod 2>nul || exit 0'
-         bat '''
-            for /f %%i in ('docker ps -aq --filter "name=lostfound-test-"') do docker rm -f %%i
-            exit /b 0
-        '''
-           bat "docker run -d -p 8081:8081 --name %TEST_CONTAINER% %DOCKERHUB_REPO%:%IMAGE_TAG%"
-           bat 'ping -n 10 127.0.0.1 > nul'
-    }
-}
+                bat 'docker stop lostfound-prod 2>nul || exit 0'
+                bat '''
+                    for /f %%i in ('docker ps -aq --filter "name=lostfound-test-"') do docker rm -f %%i
+                    exit /b 0
+                '''
+                bat "docker run -d -p 8081:8081 --name %TEST_CONTAINER% %DOCKERHUB_REPO%:%IMAGE_TAG%"
+                bat 'ping -n 10 127.0.0.1 > nul'
+            }
+        }
+
         stage('Selenium Test') {
             steps {
                 bat 'mvn test -Dtest=LostFoundSeleniumTest'
@@ -76,29 +78,3 @@ pipeline {
                 }
             }
         }
-
-        stage('Deploy') {
-            steps {
-                bat 'docker stop lostfound-prod || exit 0'
-                bat 'docker rm lostfound-prod || exit 0'
-                bat "docker run -d -p 8081:8081 --name lostfound-prod %DOCKERHUB_REPO%:latest"
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Pipeline completed successfully — app built, tested, and deployed.'
-        }
-        failure {
-            echo 'Pipeline failed — check the stage logs above for details.'
-        }
-    }
-    pipeline {
-    agent any
-    triggers {
-        githubPush()
-    }
-  
-}
-}
