@@ -78,3 +78,22 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy') {
+            steps {
+                bat 'docker stop lostfound-prod || exit 0'
+                bat 'docker rm lostfound-prod || exit 0'
+                bat "docker run -d -p 8081:8081 --name lostfound-prod %DOCKERHUB_REPO%:latest"
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully — app built, tested, and deployed.'
+        }
+        failure {
+            echo 'Pipeline failed — check the stage logs above for details.'
+        }
+    }
+}
