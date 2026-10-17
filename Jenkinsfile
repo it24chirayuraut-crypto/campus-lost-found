@@ -94,4 +94,11 @@ pipeline {
             echo 'Pipeline failed — check the stage logs above for details.'
         }
     }
+    pipeline {
+    agent any
+    triggers {
+        githubPush()
+    }
+  
+}
 }
